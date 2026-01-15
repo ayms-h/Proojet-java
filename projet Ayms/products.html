@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backoffice - Gestion Produits</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- CSS Personnalisé -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/products.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h3 class="logo">
+                <i class="bi bi-shield-lock"></i>
+                <span>AdminPanel</span>
+            </h3>
+            <button class="toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="index.html">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="users.html">
+                    <i class="bi bi-people"></i>
+                    <span>Utilisateurs</span>
+                    <span class="badge bg-primary" id="userCountBadge">0</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="products.html">
+                    <i class="bi bi-box"></i>
+                    <span>Produits</span>
+                    <span class="badge bg-success" id="productCountBadge">0</span>
+                </a>
+            </li>
+            <li>
+                <a href="orders.html">
+                    <i class="bi bi-cart"></i>
+                    <span>Commandes</span>
+                    <span class="badge bg-warning" id="orderCountBadge">0</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=3498db&color=fff" 
+                     alt="Admin" class="user-avatar" id="currentUserAvatar">
+                <div class="user-details">
+                    <h6 id="currentUserName">Chargement...</h6>
+                    <small id="currentUserEmail">admin@example.com</small>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-nav">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="productSearch" placeholder="Rechercher un produit...">
+            </div>
+            <div class="nav-actions">
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-count">0</span>
+                </button>
+                <div class="dropdown">
+                    <button class="user-dropdown" id="userDropdown" data-bs-toggle="dropdown">
+                        <span id="dropdownUserName">Admin</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="settings.html#profile"><i class="bi bi-person"></i> Profil</a></li>
+                        <li><a class="dropdown-item" href="settings.html"><i class="bi bi-gear"></i> Paramètres</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="dropdownLogout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1>Gestion des Produits</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Produits</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <i class="bi bi-plus-circle"></i> Nouveau produit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="view-toggle btn-group">
+                    <button class="btn btn-outline-secondary active" id="gridViewBtn">
+                        <i class="bi bi-grid"></i> Grille
+                    </button>
+                    <button class="btn btn-outline-secondary" id="listViewBtn">
+                        <i class="bi bi-list"></i> Liste
+                    </button>
+                </div>
+                <div class="stats-summary">
+                    <span class="badge bg-success">En stock: <span id="inStockCount">0</span></span>
+                    <span class="badge bg-warning ms-2">Stock bas: <span id="lowStockCount">0</span></span>
+                    <span class="badge bg-danger ms-2">Rupture: <span id="outOfStockCount">0</span></span>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card filters-card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Catégorie</label>
+                            <select class="form-select" id="categoryFilter" disabled>
+                                <option value="">Tous</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Statut stock</label>
+                            <select class="form-select" id="stockFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="IN_STOCK">En stock</option>
+                                <option value="LOW_STOCK">Stock bas</option>
+                                <option value="OUT_OF_STOCK">Rupture</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Trier par</label>
+                            <select class="form-select" id="sortFilter">
+                                <option value="name_asc">Nom (A-Z)</option>
+                                <option value="name_desc">Nom (Z-A)</option>
+                                <option value="price_asc">Prix (Croissant)</option>
+                                <option value="price_desc">Prix (Décroissant)</option>
+                                <option value="stock_asc">Stock (Croissant)</option>
+                                <option value="stock_desc">Stock (Décroissant)</option>
+                                <option value="date_desc">Plus récent</option>
+                                <option value="date_asc">Plus ancien</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100" id="applyProductFilters">
+                                <i class="bi bi-funnel"></i> Appliquer les filtres
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid View -->
+            <div class="products-grid" id="productsGridView">
+                <div class="row" id="productsGrid">
+                    <!-- Les produits en grille seront chargés ici -->
+                </div>
+            </div>
+
+            <!-- Products List View -->
+            <div class="products-list d-none" id="productsListView">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="productsTable">
+                                <thead>
+                                    <tr>
+                                        <th width="50">
+                                            <input type="checkbox" id="selectAllProducts">
+                                        </th>
+                                        <th>Produit</th>
+                                        <th>Prix</th>
+                                        <th>Stock</th>
+                                        <th>Statut</th>
+                                        <th>Créé le</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Les produits en liste seront chargés ici -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions-bar mt-4" id="productBulkActions" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                    <div>
+                        <span id="selectedProductsCount">0</span> produit(s) sélectionné(s)
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="bulkUpdateStockBtn">
+                            <i class="bi bi-box-arrow-in-up"></i> Mettre à jour stock
+                        </button>
+                        <button class="btn btn-outline-danger" id="bulkDeleteProductsBtn">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un nouveau produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Nom du produit *</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Description *</label>
+                                <textarea class="form-control" name="description" rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prix (€) *</label>
+                                <input type="number" class="form-control" name="price" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock *</label>
+                                <input type="number" class="form-control" name="stock" min="0" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Image URL</label>
+                                <input type="url" class="form-control" name="image" placeholder="https://...">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="addProductForm" class="btn btn-primary">Créer le produit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier le produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <input type="hidden" name="productId">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Nom du produit *</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Description *</label>
+                                <textarea class="form-control" name="description" rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prix (€) *</label>
+                                <input type="number" class="form-control" name="price" step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock *</label>
+                                <input type="number" class="form-control" name="stock" min="0" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Image URL</label>
+                                <input type="url" class="form-control" name="image" placeholder="https://...">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="editProductForm" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Product Modal -->
+    <div class="modal fade" id="viewProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails du produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewProductContent">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/dataService.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/products.js"></script>
+</body>
+</html>

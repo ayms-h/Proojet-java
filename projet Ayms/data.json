@@ -1,0 +1,100 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123",
+      "email": "admin@entreprise.com",
+      "firstName": "Pierre",
+      "lastName": "Martin",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "avatar": "https://ui-avatars.com/api/?name=Pierre+Martin&background=3498db&color=fff",
+      "createdAt": "2024-01-01",
+      "lastLogin": "2024-01-15"
+    },
+    {
+      "id": 2,
+      "username": "commercial",
+      "password": "commercial123",
+      "email": "commercial@entreprise.com",
+      "firstName": "Marie",
+      "lastName": "Dubois",
+      "role": "MANAGER",
+      "status": "ACTIVE",
+      "avatar": "https://ui-avatars.com/api/?name=Marie+Dubois&background=2ecc71&color=fff",
+      "createdAt": "2024-01-02",
+      "lastLogin": "2024-01-14"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Ordinateur Portable Pro",
+      "description": "Ordinateur portable 15\" avec processeur i7",
+      "category": "Informatique",
+      "price": 1299.99,
+      "stock": 25,
+      "status": "IN_STOCK",
+      "image": "https://via.placeholder.com/300x200/3498db/ffffff?text=PC+Pro",
+      "createdAt": "2024-01-10"
+    },
+    {
+      "id": 2,
+      "name": "Smartphone Haut de Gamme",
+      "description": "Smartphone avec caméra 108MP",
+      "category": "Électronique",
+      "price": 899.99,
+      "stock": 42,
+      "status": "IN_STOCK",
+      "image": "https://via.placeholder.com/300x200/2ecc71/ffffff?text=Smartphone",
+      "createdAt": "2024-01-11"
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "orderNumber": "CMD-2024-001",
+      "userId": 2,
+      "userName": "Marie Dubois",
+      "userEmail": "commercial@entreprise.com",
+      "products": [
+        {
+          "productId": 1,
+          "name": "Ordinateur Portable Pro",
+          "quantity": 1,
+          "price": 1299.99
+        }
+      ],
+      "totalAmount": 1299.99,
+      "status": "DELIVERED",
+      "paymentStatus": "PAID",
+      "paymentMethod": "CARD",
+      "shippingAddress": "123 Rue de Paris, 75001 Paris",
+      "notes": "Livraison express demandée",
+      "createdAt": "2024-01-12",
+      "updatedAt": "2024-01-13"
+    }
+  ],
+  "categories": [
+    {"id": 1, "name": "Électronique", "productCount": 15},
+    {"id": 2, "name": "Informatique", "productCount": 8},
+    {"id": 3, "name": "Bureau", "productCount": 12}
+  ],
+  "settings": {
+    "siteName": "Mon Backoffice",
+    "adminEmail": "contact@entreprise.com",
+    "currency": "EUR",
+    "dateFormat": "DD/MM/YYYY",
+    "timezone": "Europe/Paris",
+    "maintenance": false,
+    "registrationEnabled": true
+  },
+  "analytics": {
+    "totalUsers": 42,
+    "totalProducts": 156,
+    "totalOrders": 23,
+    "totalRevenue": 25489.50,
+    "monthlyGrowth": 12.5
+  }
+}

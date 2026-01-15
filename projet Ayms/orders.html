@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backoffice - Gestion Commandes</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- CSS Personnalisé -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/orders.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h3 class="logo">
+                <i class="bi bi-shield-lock"></i>
+                <span>AdminPanel</span>
+            </h3>
+            <button class="toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="index.html">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="users.html">
+                    <i class="bi bi-people"></i>
+                    <span>Utilisateurs</span>
+                    <span class="badge bg-primary" id="userCountBadge">0</span>
+                </a>
+            </li>
+            <li>
+                <a href="products.html">
+                    <i class="bi bi-box"></i>
+                    <span>Produits</span>
+                    <span class="badge bg-success" id="productCountBadge">0</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="orders.html">
+                    <i class="bi bi-cart"></i>
+                    <span>Commandes</span>
+                    <span class="badge bg-warning" id="orderCountBadge">0</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=3498db&color=fff" 
+                     alt="Admin" class="user-avatar" id="currentUserAvatar">
+                <div class="user-details">
+                    <h6 id="currentUserName">Chargement...</h6>
+                    <small id="currentUserEmail">admin@example.com</small>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-nav">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="orderSearch" placeholder="Rechercher une commande...">
+            </div>
+            <div class="nav-actions">
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-count">0</span>
+                </button>
+                <div class="dropdown">
+                    <button class="user-dropdown" id="userDropdown" data-bs-toggle="dropdown">
+                        <span id="dropdownUserName">Admin</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="settings.html#profile"><i class="bi bi-person"></i> Profil</a></li>
+                        <li><a class="dropdown-item" href="settings.html"><i class="bi bi-gear"></i> Paramètres</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="dropdownLogout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-fluid">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1>Gestion des Commandes</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Commandes</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                            <i class="bi bi-cart-plus"></i> Nouvelle commande
+                        </button>
+                        <button class="btn btn-outline-success" id="exportOrdersBtn">
+                            <i class="bi bi-download"></i> Exporter
+                        </button>
+                        <button class="btn btn-outline-warning" id="generateTestOrdersBtn">
+                            <i class="bi bi-magic"></i> Données test
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Stats -->
+            <div class="row stats-row mb-4">
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="bi bi-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="totalOrdersCount">0</h5>
+                            <p>Total commandes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="pendingOrdersCount">0</h5>
+                            <p>En attente</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                            <i class="bi bi-gear"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="processingOrdersCount">0</h5>
+                            <p>En traitement</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="completedOrdersCount">0</h5>
+                            <p>Complétées</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="cancelledOrdersCount">0</h5>
+                            <p>Annulées</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-4 col-6 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-secondary">
+                            <i class="bi bi-currency-euro"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h5 id="totalRevenueOrders">€0</h5>
+                            <p>Revenu total</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card filters-card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Statut commande</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="PENDING">En attente</option>
+                                <option value="PROCESSING">En traitement</option>
+                                <option value="SHIPPED">Expédiée</option>
+                                <option value="DELIVERED">Livrée</option>
+                                <option value="CANCELLED">Annulée</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Statut paiement</label>
+                            <select class="form-select" id="paymentFilter">
+                                <option value="">Tous les paiements</option>
+                                <option value="PENDING">En attente</option>
+                                <option value="PAID">Payé</option>
+                                <option value="FAILED">Échoué</option>
+                                <option value="REFUNDED">Remboursé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date de début</label>
+                            <input type="date" class="form-control" id="startDateFilter">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date de fin</label>
+                            <input type="date" class="form-control" id="endDateFilter">
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100" id="applyOrderFilters">
+                                <i class="bi bi-funnel"></i> Appliquer les filtres
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Orders Message -->
+            <div class="text-center py-5" id="noOrdersMessage" style="display: none;">
+                <i class="bi bi-cart-x display-1 text-muted"></i>
+                <h3 class="mt-3">Aucune commande trouvée</h3>
+                <p class="text-muted mb-4">Commencez par créer votre première commande</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                    <i class="bi bi-cart-plus"></i> Créer une commande
+                </button>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card" id="ordersTableCard">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liste des Commandes</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="checkbox" id="selectAllOrders">
+                                <label class="form-check-label" for="selectAllOrders">Tout sélectionner</label>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" id="printSelectedBtn">
+                                    <i class="bi bi-printer"></i> Imprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th width="50"></th>
+                                    <th>Commande</th>
+                                    <th>Client</th>
+                                    <th>Produits</th>
+                                    <th>Total</th>
+                                    <th>Statut</th>
+                                    <th>Paiement</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Les commandes seront chargées ici -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation" id="orderPaginationContainer" style="display: none;">
+                        <ul class="pagination justify-content-center" id="orderPagination">
+                            <!-- La pagination sera générée ici -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions-bar mt-4" id="orderBulkActions" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                    <div>
+                        <span id="selectedOrdersCount">0</span> commande(s) sélectionnée(s)
+                    </div>
+                    <div class="btn-group">
+                        <select class="form-select me-2" id="bulkStatusSelect" style="width: auto;">
+                            <option value="">Changer statut</option>
+                            <option value="PROCESSING">En traitement</option>
+                            <option value="SHIPPED">Expédiée</option>
+                            <option value="DELIVERED">Livrée</option>
+                            <option value="CANCELLED">Annulée</option>
+                        </select>
+                        <button class="btn btn-outline-primary" id="bulkUpdateStatusBtn">
+                            <i class="bi bi-check"></i> Appliquer
+                        </button>
+                        <button class="btn btn-outline-danger" id="bulkDeleteOrdersBtn">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Order Modal -->
+    <div class="modal fade" id="addOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Créer une nouvelle commande</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6>Produits disponibles</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" class="form-control" id="productSearchInput" 
+                                                   placeholder="Rechercher un produit par nom, catégorie...">
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" id="availableProductsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produit</th>
+                                                    <th>Prix</th>
+                                                    <th>Stock</th>
+                                                    <th>Quantité</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="availableProductsBody">
+                                                <!-- Les produits disponibles seront chargés ici -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>Produits sélectionnés</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm" id="selectedProductsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produit</th>
+                                                    <th>Prix unitaire</th>
+                                                    <th>Quantité</th>
+                                                    <th>Sous-total</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="selectedProductsBody">
+                                                <!-- Les produits sélectionnés seront ajoutés ici -->
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                                    <td><strong id="orderTotal">€0.00</strong></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <form id="addOrderForm">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6>Informations client</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nom du client *</label>
+                                            <input type="text" class="form-control" id="customerName" 
+                                                   placeholder="Ex: Jean Dupont" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Email du client *</label>
+                                            <input type="email" class="form-control" id="customerEmail" 
+                                                   placeholder="client@exemple.com" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Adresse de livraison *</label>
+                                            <textarea class="form-control" id="shippingAddress" rows="3" 
+                                                      placeholder="Adresse complète de livraison..." required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h6>Statut & Paiement</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Statut de la commande *</label>
+                                            <select class="form-select" name="status" required>
+                                                <option value="PENDING">En attente</option>
+                                                <option value="PROCESSING">En traitement</option>
+                                                <option value="SHIPPED">Expédiée</option>
+                                                <option value="DELIVERED">Livrée</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Statut du paiement *</label>
+                                            <select class="form-select" name="paymentStatus" required>
+                                                <option value="PENDING">En attente</option>
+                                                <option value="PAID">Payé</option>
+                                                <option value="FAILED">Échoué</option>
+                                                <option value="REFUNDED">Remboursé</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Méthode de paiement</label>
+                                            <select class="form-select" name="paymentMethod">
+                                                <option value="CARD">Carte bancaire</option>
+                                                <option value="PAYPAL">PayPal</option>
+                                                <option value="TRANSFER">Virement</option>
+                                                <option value="CASH">Espèces</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Notes & Informations</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <textarea class="form-control" name="notes" rows="3" 
+                                                  placeholder="Notes internes, instructions spéciales..."></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="createOrderBtn">
+                        <i class="bi bi-check-circle"></i> Créer la commande
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Order Modal -->
+    <div class="modal fade" id="viewOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails de la commande</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewOrderContent">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="printOrderBtn">
+                        <i class="bi bi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div class="modal fade" id="editOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier la commande</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editOrderForm">
+                        <input type="hidden" name="orderId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Statut commande *</label>
+                                <select class="form-select" name="status" required>
+                                    <option value="PENDING">En attente</option>
+                                    <option value="PROCESSING">En traitement</option>
+                                    <option value="SHIPPED">Expédiée</option>
+                                    <option value="DELIVERED">Livrée</option>
+                                    <option value="CANCELLED">Annulée</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Statut paiement *</label>
+                                <select class="form-select" name="paymentStatus" required>
+                                    <option value="PENDING">En attente</option>
+                                    <option value="PAID">Payé</option>
+                                    <option value="FAILED">Échoué</option>
+                                    <option value="REFUNDED">Remboursé</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Adresse livraison *</label>
+                                <textarea class="form-control" name="shippingAddress" rows="3" required></textarea>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" name="notes" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="editOrderForm" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.</p>
+                    <p class="text-danger"><i class="bi bi-exclamation-triangle"></i> Cette commande sera définitivement supprimée.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/dataService.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/orders.js"></script>
+</body>
+</html>
